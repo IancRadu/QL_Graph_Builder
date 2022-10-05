@@ -16,19 +16,11 @@ class get_data:
             pass  # returns None if Config Excel file is open
 
     @staticmethod
-    def read_values(path, chambers):
+    def read_values(path):
         try:
             df = pd.read_excel(path, "AMR WinControl", header=0)
             df_as_dict = df.to_dict()
-            for value in df_as_dict["Unnamed: 0"]:
-                for key in chambers:  # key = Name of climatic chamber
-                    for i in df:  # For header name in Excel file
-                        if i.split(' ')[0].strip(' ') == f"{chambers[key]}.0":  # .0 represent the values from temp
-                            for m in df[i]:  # value from column i
-                                temperature_0 = m
-                        if i.split(' ')[0].strip(' ') == f"{chambers[key]}.1":  # .1 represent the values from humidity
-                            for m in df[i]:  # value from column i
-                                humidity_1 = m
+            return df, df_as_dict
 
         except PermissionError:
             pass  # returns None if Config Excel file is open
