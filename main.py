@@ -19,7 +19,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///Ahlborn_data.db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-
 data = get_data()
 
 #Function to convert string C1 to class with the same name.
@@ -73,7 +72,7 @@ def show():
     humidity_1 = [82, 83, 84, 81, 85, 154]
     Temperature_y_min = 20
     Temperature_y_max = 90
-    xygraph = graph(date, temperature_0, humidity_1=humidity_1, Temperature_y_min=Temperature_y_min,
+    xygraph = graph(date, temperature_0, Temperature_y_min=Temperature_y_min,
       Temperature_y_max=Temperature_y_max)
     return xygraph
 

@@ -1,4 +1,7 @@
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
+
 import matplotlib.dates as mdates  # used for tikers
 import mpld3
 import base64
@@ -43,6 +46,7 @@ def graph(date, temperature_0, **kwargs):
         ax2 = ax1.twinx()  # create another axis that shares the same x-axis
         plt.plot(date, kwargs['humidity_1'], label="Humidity(rH%)", color="blue")  # kwargs['humidity_1'] represents
         # humidity which is optional to be shown in graph
+        plt.plot(date, temperature_0, label="Temperature(°C)", color="red")
         ax2.set_ylabel('Humidity', color="blue", fontsize="16")
         ax2.set_ylim(0, 100)
     except KeyError:
