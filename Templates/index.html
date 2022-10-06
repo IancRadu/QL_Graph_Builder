@@ -2,9 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
     <title>Ahlborn Graph Builder</title>
 </head>
 <body>
-
-</body>
+<div class="page-title">Ahlborn Graph Builder</div>
+<div class="form-container">
+        <div class="form"><form action="{{ url_for('show') }}" method="POST">
+        <label for="Chamber">Chamber:</label>
+             <select id="Chamber" name="Chamber">
+             <option value="C1">Climatic_01</option>
+             <option value="C2">Climatic_02</option>
+             <option value="C3">Climatic_03</option>
+             <option value="C4">Climatic_04</option>
+             </select>
+        <label class = "text">Start date: </label><input type="datetime-local" placeholder="Start_date" name="Start_date" required>
+        <label>End date: </label><input type="datetime-local" placeholder="End_date" name="End_date" required>
+        <label for="humidity">Show humidity:</label>
+             <select id="humidity" name="humidity">
+             <option value="humidity_1">Yes</option>
+             <option value="None">No</option></select>
+        <button type="submit">Ok</button>
+    </form>
+</div>
+    </div>
+    {{graph|safe}}
+    </body>
 </html>

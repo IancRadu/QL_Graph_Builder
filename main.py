@@ -2,6 +2,8 @@
 # TODO 2: Read CSV files and add to database.
 # TODO 3: Function to create graph based on database querry.
 # TODO 4: Show graph on webpage based on user request.
+from flask import Blueprint, render_template,request
+
 import importlib
 from flask import Flask
 from sqlalchemy import inspect
@@ -62,25 +64,42 @@ def append_data(values,chambers):
                     print("File is already loaded in database")
                     db.session.rollback()
 
-@app.route("/")
+@app.route("/",methods = ['GET', 'POST'])
 def show():
     add_data_to_db()
-    print(get_values(C1,start_date=datetime.datetime(2022, 5, 29, 0, 0, 53, 583000),end_date=datetime.datetime(2022, 5, 29, 1, 18, 53, 584000)))
-    # return "ss"
-    date = [1, 2, 3, 4, 5, 6]
-    temperature_0 = [23, 42, 43, 44, 41, 23]
-    humidity_1 = [82, 83, 84, 81, 85, 154]
+    # print(get_values(C1,start_date=datetime.datetime(2022, 5, 29, 0, 0, 53, 583000),end_date=datetime.datetime(2022, 5, 29, 1, 18, 53, 584000)))
+    date1 = [1, 2, 3, 4, 5, 6]
+    # temperature_0 = [23, 42, 43, 44, 41, 23]
+    # humidity_1 = [82, 83, 84, 81, 85, 154]
     Temperature_y_min = 20
     Temperature_y_max = 90
-    xygraph = graph(date, temperature_0, Temperature_y_min=Temperature_y_min,
-      Temperature_y_max=Temperature_y_max)
-    return xygraph
+    if request.method =="POST":
+        # To get the names and values of forms
+        # for i in request.form:
+        #     print(f"{i} is {request.form[i]}")
+        # start = datetime.datetime.strptime(request.form["Start_date"].replace("T", " ") + ":00.000000","%Y-%m-%d %H:%M:%S %Z")
+        # print(start)
+        start = datetime.datetime.fromisoformat(request.form["Start_date"])
+        end = datetime.datetime.fromisoformat(request.form["End_date"])
+        values_between = get_values(str_to_class(request.form["Chamber"]), start_date=start,end_date=end)
+        # for i in values_between:
+        #     print(values_between[i])
+        date = [i for i in values_between]
+        temperature_0 = [values_between[i][0] for i in values_between]
+        try:
+            if request.form["humidity"] == 'humidity_1':
+                humidity_1 = [values_between[i][1] for i in values_between]
+                xygraph = graph(date, temperature_0,humidity_1=humidity_1, Temperature_y_min=Temperature_y_min,
+                                Temperature_y_max=Temperature_y_max)
+        except KeyError:
+            print("Error")
+            xygraph = graph(date, temperature_0, Temperature_y_min=Temperature_y_min,
+                            Temperature_y_max=Temperature_y_max)
+            pass
 
-@app.route("/add_data")
-def generate_tables():
-
-        return "ssccasz"
-
+        return render_template('index.html', graph=xygraph)
+    else:
+        return render_template('index.html')
 
 if __name__ == "__main__":
     app.run(debug=True)
