@@ -1,3 +1,5 @@
+import datetime
+
 from main import db
 
 
@@ -8,9 +10,18 @@ def add_values(class_name, date, temperature_0, humidity_1):
     db.session.commit()
 
 
+# Function which return values between two dates from db
+def get_values(class_name, start_date, end_date): # start_date and end_date are a datetime object
+    data = {}
+    for i in class_name.query.order_by('date').all():
+        if start_date < i.date < end_date:
+            data[i.date] = [i.temperature_0, i.humidity_1]
+    return data
+
+
 # Sad way to generate new tables in database.
 class Files_added(db.Model):
-    file_name = db.Column(db.String(250),primary_key=True, nullable=False)
+    file_name = db.Column(db.String(250), primary_key=True, nullable=False)
 
     def __init__(self, file_name):
         self.file_name = file_name
@@ -19,6 +30,8 @@ class Files_added(db.Model):
         new_datas = Files_added(file_name)
         db.session.add(new_datas)
         db.session.commit()
+
+
 class C1(db.Model):
     date = db.Column(db.DateTime, primary_key=True, nullable=False)
     temperature_0 = db.Column(db.String(250), nullable=False)
@@ -1085,6 +1098,7 @@ class C97(db.Model):
         self.temperature_0 = temperature_0
         self.humidity_1 = humidity_1
 
+
 class C98(db.Model):
     date = db.Column(db.DateTime, primary_key=True, nullable=False)
     temperature_0 = db.Column(db.String(250), nullable=False)
@@ -1094,6 +1108,7 @@ class C98(db.Model):
         self.date = date
         self.temperature_0 = temperature_0
         self.humidity_1 = humidity_1
+
 
 class C99(db.Model):
     date = db.Column(db.DateTime, primary_key=True, nullable=False)
@@ -1105,6 +1120,7 @@ class C99(db.Model):
         self.temperature_0 = temperature_0
         self.humidity_1 = humidity_1
 
+
 class C100(db.Model):
     date = db.Column(db.DateTime, primary_key=True, nullable=False)
     temperature_0 = db.Column(db.String(250), nullable=False)
@@ -1114,5 +1130,6 @@ class C100(db.Model):
         self.date = date
         self.temperature_0 = temperature_0
         self.humidity_1 = humidity_1
+
 
 db.create_all()

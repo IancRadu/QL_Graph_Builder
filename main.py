@@ -10,6 +10,7 @@ import pathlib
 from datetime import datetime
 from xls_data import get_data
 from classes import *
+from graph import graph
 from sqlalchemy.exc import IntegrityError
 app = Flask(__name__)
 
@@ -65,7 +66,16 @@ def append_data(values,chambers):
 @app.route("/")
 def show():
     add_data_to_db()
-    return "ss"
+    print(get_values(C1,start_date=datetime.datetime(2022, 5, 29, 0, 0, 53, 583000),end_date=datetime.datetime(2022, 5, 29, 1, 18, 53, 584000)))
+    # return "ss"
+    date = [1, 2, 3, 4, 5, 6]
+    temperature_0 = [23, 42, 43, 44, 41, 23]
+    humidity_1 = [82, 83, 84, 81, 85, 154]
+    Temperature_y_min = 20
+    Temperature_y_max = 90
+    xygraph = graph(date, temperature_0, humidity_1=humidity_1, Temperature_y_min=Temperature_y_min,
+      Temperature_y_max=Temperature_y_max)
+    return xygraph
 
 @app.route("/add_data")
 def generate_tables():
