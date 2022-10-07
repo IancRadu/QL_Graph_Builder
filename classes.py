@@ -4,14 +4,20 @@ from main import db
 
 
 # Function to add data to DB
-def add_values(class_name, date, temperature_0, humidity_1):
-    new_data = class_name(date, temperature_0, humidity_1)
+def add_values(class_name, **kwargs):
+    new_data = class_name(kwargs['date'], kwargs['temperature_0'], kwargs['humidity_1'])
     db.session.add(new_data)
     db.session.commit()
 
 
+def update_values_humidity(class_name, date, humidity_1):
+    new_update = class_name.query.get(date)
+    new_update.humidity_1 = humidity_1
+    db.session.commit()
+
+
 # Function which return values between two dates from db
-def get_values(class_name, start_date, end_date): # start_date and end_date are a datetime object
+def get_values(class_name, start_date, end_date):  # start_date and end_date are a datetime object
     data = {}
     for i in class_name.query.order_by('date').all():
         if start_date < i.date < end_date:
