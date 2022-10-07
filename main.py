@@ -39,40 +39,45 @@ def add_data_to_db():
             all_values = db.session.query(Files_added).all()
             values = [i.file_name for i in all_values]
             if child.name in values:
-                print(f"{child.name} is already loaded in databasexzczx")
+                print(f"{child.name} is already loaded in database")
                 continue
             else:
-                append_data(data.read_values(child),chambers=data.read_config_xlsx()[0]) # Add Ahlborn values from Excel to DB
-                Files_added.add_value(child.name)   #Add Ahlborn file name to DB
+                append_data(data.read_values(child),chambers=data.read_config_xlsx()[0])  # Add Ahlborn values from Excel to DB
+                Files_added.add_value(child.name)  # Add Ahlborn file name to DB
 
 def append_data(values,chambers):
     df=values[0]
     df_as_dict = values[1]
-    for value in df_as_dict["Unnamed: 0"]:
-            for key in chambers:  # key = Name of climatic chamber
-                for i in df:  # For header name in Excel file
-                    for m in df[i]:
+    for key in chambers:  # key = Name of climatic chamber
+            # print(key)
+        for value in df_as_dict["Unnamed: 0"]:  # value - represents the rows, the count starts from 0 not from 1
+            for i in df:  # For header name(i) in Excel file
+
                         if i.split(' ')[0].strip(' ') == f"{chambers[key]}.0":  # .0 represent the values from temp
-                            # value from column i
-                            temperature_0 = m
+                            temperature_0 = df[i][value]
+                            # print(f'{i}-> {temperature_0}')
+                            try:
+                                add_values(class_name=str_to_class(f'C{chambers[key]}'),
+                                           date=df_as_dict["Unnamed: 0"][value], temperature_0=df[i][value],
+                                           humidity_1='0')
+                            except IntegrityError:
+                                print(f"{IntegrityError}-> File is already loaded in database")
+                                db.session.rollback()
                         if i.split(' ')[0].strip(' ') == f"{chambers[key]}.1":  # .1 represent the values from humidity
-                            humidity_1 = m
-                try:
-                    add_values(class_name=str_to_class(f'C{chambers[key]}'),
-                           date=df_as_dict["Unnamed: 0"][value], temperature_0=m, humidity_1=m)
-                except IntegrityError:
-                    print(f"{IntegrityError}-> File is already loaded in database")
-                    db.session.rollback()
+                            humidity_1 = df[i][value]
+                            # print(humidity_1)
+                            update_values_humidity(class_name=str_to_class(f'C{chambers[key]}'),
+                           date=df_as_dict["Unnamed: 0"][value], humidity_1=df[i][value])
 
 @app.route("/",methods = ['GET', 'POST'])
 def show():
     add_data_to_db()
     # print(get_values(C1,start_date=datetime.datetime(2022, 5, 29, 0, 0, 53, 583000),end_date=datetime.datetime(2022, 5, 29, 1, 18, 53, 584000)))
-    date1 = [1, 2, 3, 4, 5, 6]
+    # date1 = [1, 2, 3, 4, 5, 6]
     # temperature_0 = [23, 42, 43, 44, 41, 23]
     # humidity_1 = [82, 83, 84, 81, 85, 154]
-    Temperature_y_min = 20
-    Temperature_y_max = 90
+    Temperature_y_min = -20
+    Temperature_y_max = 130
     if request.method =="POST":
         # To get the names and values of forms
         # for i in request.form:
@@ -90,6 +95,9 @@ def show():
             if request.form["humidity"] == 'humidity_1':
                 humidity_1 = [values_between[i][1] for i in values_between]
                 xygraph = graph(date, temperature_0,humidity_1=humidity_1, Temperature_y_min=Temperature_y_min,
+                                Temperature_y_max=Temperature_y_max)
+            else:
+                xygraph = graph(date, temperature_0, Temperature_y_min=Temperature_y_min,
                                 Temperature_y_max=Temperature_y_max)
         except KeyError:
             print("Error")
