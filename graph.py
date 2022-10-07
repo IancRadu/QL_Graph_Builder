@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 
-matplotlib.use('Agg')
+# matplotlib.use('Agg')
 
 import matplotlib.dates as mdates  # used for tikers
 import mpld3
@@ -28,23 +28,20 @@ import main
 #     return html_str
 
 def graph(date, temperature_0, **kwargs):
-    fig = plt.figure(figsize=(18, 8), dpi=80)  # set the size of the matplotlib canvas
+    fig = plt.figure(figsize=(18, 8), dpi=80)
     #  plt.plot needs to receive an array of values
-    dates = matplotlib.dates.date2num(date)
-
-    plt.plot_date(dates, np.array(temperature_0), label="Temperature(°C)", color="red")
+    temperature_0_float = [float(i) for i in temperature_0]
+    plt.plot(date, temperature_0_float, label="Temperature(°C)", color="red") # values have to be of type float for temperature
     plt.xlabel('Time', color="black", fontsize="30")
     plt.ylabel('Temperature', color="red", fontsize="30")
     plt.grid(color='grey', linestyle='--', visible=True)  # Color can be changed to white to hide grid
-
-    min_value = float(min(temperature_0))
-    max_value = float(max(temperature_0))
-    print(min_value)
-    print(max_value)
-    # plt.yscale('linear')
-    # plt.yticks(np.arange(round(min_value-10), round(max_value+10), 5.0))
+    min_value = min(temperature_0_float)
+    max_value = max(temperature_0_float)
+    plt.yscale('linear')
+    plt.yticks(np.arange(round(min_value-15), round(max_value+15), 5.0))
+    plt.ylim(min_value-20, max_value+20)
     # plt.ylim(bottom=-50,top=150)
-    # plt.axis(ymin=-40, ymax=2000)
+    # plt.axis(ymin=-40, ymax=200)
     # plt.minorticks_off()
     # plt.tick_params(direction='out', length=6, width=2, colors='r')
     # months = mdates.MonthLocator()
@@ -81,7 +78,7 @@ def graph(date, temperature_0, **kwargs):
     #     # Embed the result in the html output.
     figs = plt.savefig('graph.png')
     data = base64.b64encode(buf.getbuffer()).decode("ascii")
-    return f"<img src='data:image/png;base64,{data}'/>"
-    # graph_result = plt.show() # to show graph
+    # return f"<img src='data:image/png;base64,{data}'/>"
+    graph_result = plt.show() # to show graph
     # html_str = mpld3.fig_to_html(fig)  # library which converts figure as html
     # return html_str
