@@ -39,10 +39,10 @@ def add_data_to_db():
             all_values = db.session.query(Files_added).all()
             values = [i.file_name for i in all_values]
             if child.name in values:
-                print(f"{child.name} is already loaded in database")
+                print(f"{child.name} is already loaded in databasexzczx")
                 continue
             else:
-                append_data(values,chambers=data.read_config_xlsx()[0]) # Add Ahlborn values from Excel to DB
+                append_data(data.read_values(child),chambers=data.read_config_xlsx()[0]) # Add Ahlborn values from Excel to DB
                 Files_added.add_value(child.name)   #Add Ahlborn file name to DB
 
 def append_data(values,chambers):
@@ -61,7 +61,7 @@ def append_data(values,chambers):
                     add_values(class_name=str_to_class(f'C{chambers[key]}'),
                            date=df_as_dict["Unnamed: 0"][value], temperature_0=m, humidity_1=m)
                 except IntegrityError:
-                    print("File is already loaded in database")
+                    print(f"{IntegrityError}-> File is already loaded in database")
                     db.session.rollback()
 
 @app.route("/",methods = ['GET', 'POST'])
