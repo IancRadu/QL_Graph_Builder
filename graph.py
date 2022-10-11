@@ -11,6 +11,7 @@ from io import BytesIO
 from matplotlib.figure import Figure
 import main
 
+#TODO: Make new plot each time date is not available in under 60seconds
 
 # def graph(date, temperature_0, **kwargs):
 #     # Generate the figure **without using pyplot**.

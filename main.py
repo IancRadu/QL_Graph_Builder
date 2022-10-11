@@ -2,8 +2,10 @@
 # TODO 2: Read CSV files and add to database.
 # TODO 3: Function to create graph based on database querry.
 # TODO 4: Show graph on webpage based on user request.
+import time
+import numpy as np
 from flask import Blueprint, render_template,request
-
+import numpy
 import importlib
 from flask import Flask
 from sqlalchemy import inspect
@@ -42,9 +44,10 @@ def add_data_to_db():
                 print(f"{child.name} is already loaded in database")
                 continue
             else:
+                print(f"Started reading: {child.name}")
                 append_data(data.read_values(child),chambers=data.read_config_xlsx()[0])  # Add Ahlborn values from Excel to DB
                 Files_added.add_value(child.name)  # Add Ahlborn file name to DB
-
+                print(f"Finished reading: {child.name}")
 def append_data(values,chambers):
     df=values[0]
     df_as_dict = values[1]
@@ -55,19 +58,29 @@ def append_data(values,chambers):
 
                         if i.split(' ')[0].strip(' ') == f"{chambers[key]}.0":  # .0 represent the values from temp
                             temperature_0 = df[i][value]
-                            # print(f'{i}-> {temperature_0}')
+                            # print(f'{df_as_dict["Unnamed: 0"][value]}-> {temperature_0}')
+                            # print(type(df[i][value]))
                             try:
-                                add_values(class_name=str_to_class(f'C{chambers[key]}'),
+                                if np.isnan(df[i][value]): # If value from df is Nan, means that no values were mesaured on that equipment.
+                                    continue
+                                else:
+                                    add_values(class_name=str_to_class(f'C{chambers[key]}'),
                                            date=df_as_dict["Unnamed: 0"][value], temperature_0=df[i][value],
                                            humidity_1='0')
                             except IntegrityError:
-                                print(f"{IntegrityError}-> File is already loaded in database")
+                                print(f"{IntegrityError}")
                                 db.session.rollback()
                         if i.split(' ')[0].strip(' ') == f"{chambers[key]}.1":  # .1 represent the values from humidity
-                            humidity_1 = df[i][value]
-                            # print(humidity_1)
-                            update_values_humidity(class_name=str_to_class(f'C{chambers[key]}'),
-                           date=df_as_dict["Unnamed: 0"][value], humidity_1=df[i][value])
+                            if np.isnan(df[i][value]): # If value from df is Nan, set the humidity to 0.
+                                try:
+                                    update_values_humidity(class_name=str_to_class(f'C{chambers[key]}'),
+                                                       date=df_as_dict["Unnamed: 0"][value], humidity_1='0')
+                                except AttributeError: # when triggered, means no value exist for temperature at that time, so no reason to transform humidity to 0
+                                    continue
+                            else:
+                                update_values_humidity(class_name=str_to_class(f'C{chambers[key]}'),
+                                                       date=df_as_dict["Unnamed: 0"][value], humidity_1=df[i][value])
+
 
 @app.route("/",methods = ['GET', 'POST'])
 def show():
@@ -104,7 +117,6 @@ def show():
             xygraph = graph(date, temperature_0, Temperature_y_min=Temperature_y_min,
                             Temperature_y_max=Temperature_y_max)
             pass
-
         return render_template('index.html', graph=xygraph)
     else:
         return render_template('index.html')
