@@ -30,8 +30,6 @@ import sys
 def str_to_class(classname):
     return getattr(sys.modules[__name__], classname)
 
-
-
 def add_data_to_db():
 # Check if excel file is in folder
     path = pathlib.Path(data.read_config_xlsx()[1])
@@ -41,7 +39,7 @@ def add_data_to_db():
             all_values = db.session.query(Files_added).all()
             values = [i.file_name for i in all_values]
             if child.name in values:
-                print(f"{child.name} is already loaded in database")
+                # print(f"{child.name} is already loaded in database")
                 continue
             else:
                 print(f"Started reading: {child.name}")
@@ -55,7 +53,6 @@ def append_data(values,chambers):
             # print(key)
         for value in df_as_dict["Unnamed: 0"]:  # value - represents the rows, the count starts from 0 not from 1
             for i in df:  # For header name(i) in Excel file
-
                         if i.split(' ')[0].strip(' ') == f"{chambers[key]}.0":  # .0 represent the values from temp
                             temperature_0 = df[i][value]
                             # print(f'{df_as_dict["Unnamed: 0"][value]}-> {temperature_0}')
@@ -81,45 +78,40 @@ def append_data(values,chambers):
                                 update_values_humidity(class_name=str_to_class(f'C{chambers[key]}'),
                                                        date=df_as_dict["Unnamed: 0"][value], humidity_1=df[i][value])
 
-
 @app.route("/",methods = ['GET', 'POST'])
 def show():
-    add_data_to_db()
-    # print(get_values(C1,start_date=datetime.datetime(2022, 5, 29, 0, 0, 53, 583000),end_date=datetime.datetime(2022, 5, 29, 1, 18, 53, 584000)))
-    # date1 = [1, 2, 3, 4, 5, 6]
-    # temperature_0 = [23, 42, 43, 44, 41, 23]
-    # humidity_1 = [82, 83, 84, 81, 85, 154]
-    Temperature_y_min = -20
-    Temperature_y_max = 130
+    # add_data_to_db()
+    config=data.read_config_xlsx()[0] # values with name and number of climatic chambers
+    # xygraph=test_graph() # used to test graph
     if request.method =="POST":
-        # To get the names and values of forms
-        # for i in request.form:
+        # for i in request.form: # To get the names and values of forms
         #     print(f"{i} is {request.form[i]}")
-        # start = datetime.datetime.strptime(request.form["Start_date"].replace("T", " ") + ":00.000000","%Y-%m-%d %H:%M:%S %Z")
-        # print(start)
         start = datetime.datetime.fromisoformat(request.form["Start_date"])
         end = datetime.datetime.fromisoformat(request.form["End_date"])
         values_between = get_values(str_to_class(request.form["Chamber"]), start_date=start,end_date=end)
-        # for i in values_between:
-        #     print(values_between[i])
         date = [i for i in values_between]
         temperature_0 = [values_between[i][0] for i in values_between]
         try:
             if request.form["humidity"] == 'humidity_1':
                 humidity_1 = [values_between[i][1] for i in values_between]
-                xygraph = graph(date, temperature_0,humidity_1=humidity_1, Temperature_y_min=Temperature_y_min,
-                                Temperature_y_max=Temperature_y_max)
+                xygraph = graph(date, temperature_0,humidity_1=humidity_1)
             else:
-                xygraph = graph(date, temperature_0, Temperature_y_min=Temperature_y_min,
-                                Temperature_y_max=Temperature_y_max)
+                xygraph = graph(date, temperature_0)
         except KeyError:
             print("Error")
-            xygraph = graph(date, temperature_0, Temperature_y_min=Temperature_y_min,
-                            Temperature_y_max=Temperature_y_max)
+            xygraph = graph(date, temperature_0)
             pass
-        return render_template('index.html', graph=xygraph)
+        return render_template('index.html', graph=xygraph, chamber_values = config)
     else:
-        return render_template('index.html')
+        return render_template('index.html', chamber_values = config)
+def test_graph():
+    values_between = get_values(C1, start_date=datetime.datetime(2021, 9, 26, 0, 0, 53, 583000),
+                                end_date=datetime.datetime(2021, 9, 29, 1, 18, 53, 584000))
+    date = [i for i in values_between]
+    temperature_0 = [values_between[i][0] for i in values_between]
+    humidity_1 = [values_between[i][1] for i in values_between]
+    xygraph = graph(date, temperature_0, humidity_1=humidity_1)
+    return xygraph
 
 if __name__ == "__main__":
     app.run(debug=True)

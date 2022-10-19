@@ -3,30 +3,38 @@
 <head>
     <meta charset="UTF-8">
 
-    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'style.css') }}">
+    <link class="title-icon" rel="icon" href="{{ url_for('static', filename= 'logo-ql-removebg.png') }}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ahlborn Graph Builder</title>
 </head>
-<body>
-<div class="page-title">Ahlborn Graph Builder</div>
+<body class="container">
+<div class="page-title title">Ahlborn Graph Builder</div>
 <div class="form-container">
         <div class="form"><form action="{{ url_for('show') }}" method="POST">
-        <label for="Chamber">Chamber:</label>
+            <div class="form-container-sub">
+        <div class="sub"><label for="Chamber">Chamber:</label>
              <select id="Chamber" name="Chamber">
-             <option value="C1">Climatic_01</option>
-             <option value="C2">Climatic_02</option>
-             <option value="C3">Climatic_03</option>
-             <option value="C4">Climatic_04</option>
-             </select>
-        <label class = "text">Start date: </label><input type="datetime-local" placeholder="Start_date" name="Start_date" required>
-        <label>End date: </label><input type="datetime-local" placeholder="End_date" name="End_date" required>
-        <label for="humidity">Show humidity:</label>
+                 {%for item in chamber_values %}
+             <option value="C{{chamber_values[item]}}">{{item |safe}}</option>
+                 {%endfor%}
+             </select></div>
+        <div class="sub"><label class = "text">Start date: </label><input type="datetime-local" placeholder="Start_date" name="Start_date" required></div>
+        <div class="sub"><label>End date: </label><input type="datetime-local" placeholder="End_date" name="End_date" required></div>
+        <div class="sub"><label for="humidity">Show humidity:</label>
              <select id="humidity" name="humidity">
-             <option value="humidity_1">Yes</option>
-             <option value="None">No</option></select>
-        <button type="submit">Ok</button>
+                 <option value="None">No</option>
+             <option value="humidity_1">Yes</option></select></div></div>
+        <div class="form-container-sub"><div class="buttons"><button type="submit">Submit</button></div></div>
     </form>
 </div>
     </div>
-    {{graph|safe}}
+{%if graph%}
+    <div class="main-part graph-text">{{graph|safe}}</div>
+{%else%}
+    <div class="main-part image"></div>
+{%endif%}
+
+<div class="footer">Powered by Ianc Radu</div>
     </body>
 </html>

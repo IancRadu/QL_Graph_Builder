@@ -1,15 +1,10 @@
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
-
-matplotlib.use('Agg')
-
-import matplotlib.dates as mdates  # used for tikers
-import mpld3
 import base64
 from io import BytesIO
-from matplotlib.figure import Figure
-import main
+
+matplotlib.use('Agg')
 
 
 def graph(date, temperature_0, **kwargs):
@@ -24,8 +19,8 @@ def graph(date, temperature_0, **kwargs):
                 if time_difference > 300:
                     plot_w_time_difference = True
                     end_plot = i
-                    print(
-                        f"New graph: {time_difference} between {date[i]} and {date[i + 1]} with start:{new_start_plot} and end: {end_plot}")
+                    # print(
+                    #     f"New graph: {time_difference} between {date[i]} and {date[i + 1]} with start:{new_start_plot} and end: {end_plot}")
                     plot_date = [value for value in date if date[new_start_plot] <= value <= date[end_plot]]
                     plot_y_values = [value for xvalue, value in enumerate(y_axis_values) if
                                      new_start_plot <= xvalue <= end_plot]
@@ -44,46 +39,24 @@ def graph(date, temperature_0, **kwargs):
     plt.xlabel('Time', color="black", fontsize="30")
     plt.ylabel('Temperature', color="red", fontsize="30")
     plt.grid(color='grey', linestyle='--', visible=True)  # Color can be changed to white to hide grid
-    min_value = min(temperature_0_float)
+    try:  # Used to catch and return to user a message when no values are available in the time period requested.
+        min_value = min(temperature_0_float)
+    except ValueError:
+        return "No records are available in the database. Use another start date before submitting a new search."
     max_value = max(temperature_0_float)
     plt.yscale('linear')
     plt.yticks(np.arange(round(min_value - 15, -1), round(max_value + 15, 1), 5.0))
     plt.ylim(min_value - 10, max_value + 10)
     plt.gcf().autofmt_xdate()
-
-    # plt.xticks(np.arange(min(date), max(date)))
-    # ----------------------------- To format the date for x axis
-    # plt.gcf().autofmt_xdate()
-    # myFmt = mdates.DateFormatter('%d-%m-%Y')  # %H:%M
-    # plt.gca().xaxis.set_major_formatter(myFmt)
-    # myFmtDay = mdates.DateFormatter('%d-%m-%Y')  # %H:%M
-    # plt.gca().xaxis.set_minor_formatter(myFmtDay)
-    # plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
-    # plt.gca().xaxis.set_minor_locator(mdates.DayLocator())
-    # # plt.xlim(min(date),max(date))
-    # # plt.minorticks_off()
-    # # plt.tick_params(axis="x",direction='out', length=6, width=2)
-    # # months = mdates.MonthLocator()
-    # # weeks = mdates.WeekdayLocator()
     try:
-        # humidity_float =[float(i) for i in kwargs['humidity_1']]
+        x = kwargs['humidity_1']  # left only to trow error is humidity_1 is not found
         ax1 = plt.gca()  # get current axes
         ax2 = ax1.twinx()  # create another axis that shares the same x-axis
         new_plot(kwargs['humidity_1'], 'label="Humidity(rH%)', 'blue')
-        # plt.plot(date, kwargs['humidity_1'], label="Humidity(rH%)", color="")  # kwargs['humidity_1'] represents
-        # humidity which is optional to be shown in graph
-        # plt.grid(color='grey', linestyle='--')  # Color can be changed to white to hide grid
-        # plt.plot(dates, temperature_0, label="Temperature(°C)", color="red")
-        # ax2.minorticks_off() #Remove minor ticks from the current plot.
         ax2.set_ylabel('Humidity', color="blue", fontsize="30")
-        ax2.set_ylim([0, 100])
+        ax2.set_ylim([0, 101])
         ax2.set_yscale('linear')
         ax1.set_yscale('linear')
-        # ax2.xaxis.set_major_formatter(mdates.DateFormatter("%m"))
-        # ax2.xaxis.set_major_locator(locator=months)
-        # ax2.xaxis.set_minor_locator(locator=weeks)
-        # ax.xaxis.set_major_formatter(
-        #     mdates.ConciseDateFormatter(ax.xaxis.get_major_locator()))
     except KeyError:
         print("No humidity")
         pass
