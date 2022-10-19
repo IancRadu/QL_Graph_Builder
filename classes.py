@@ -11,9 +11,12 @@ def add_values(class_name, **kwargs):
 
 
 def update_values_humidity(class_name, date, humidity_1):
-    new_update = class_name.query.get(date)
-    new_update.humidity_1 = humidity_1
-    db.session.commit()
+    try:
+        new_update = class_name.query.get(date)
+        new_update.humidity_1 = humidity_1
+        db.session.commit()
+    except AttributeError:  # Is thrown when no temperature values are found in database
+        pass
 
 
 # Function which return values between two dates from db
