@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 
-# matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 import matplotlib.dates as mdates  # used for tikers
 import mpld3
@@ -11,7 +11,8 @@ from io import BytesIO
 from matplotlib.figure import Figure
 import main
 
-#TODO: Make new plot each time date is not available in under 60seconds
+
+# TODO: Make new plot each time date is not available in under 60seconds
 
 # def graph(date, temperature_0, **kwargs):
 #     # Generate the figure **without using pyplot**.
@@ -29,18 +30,38 @@ import main
 #     return html_str
 
 def graph(date, temperature_0, **kwargs):
-    fig = plt.figure(figsize=(18, 8), dpi=80)
-    #  plt.plot needs to receive an array of values
+    fig = plt.figure(figsize=(18, 8), dpi=80)  # plt.plot needs to receive an array of values
+
     temperature_0_float = [float(i) for i in temperature_0]
-    plt.plot(date, temperature_0_float, label="Temperature(°C)", color="red") # values have to be of type float for temperature
+    new_start_plot = 0
+    end_plot = 0
+    # -----------------------------Plot a new line if no values are recorded for 300 seconds before a new point arise.
+    for i in range(0, len(date)):
+        # print(f"{i} try with {i+1}")
+        if i < len(date) - 1:
+            time_difference = (date[i + 1] - date[i]).seconds
+            if time_difference > 660:
+                end_plot = i
+                print(f"New graph: {time_difference} between {date[i+1]} and {date[i]} with start:{new_start_plot} and end: {end_plot}")
+                plot_date = [value for value in date if date[new_start_plot] <= value <= date[end_plot]]
+                plot_temperature_0_float = [value for x, value in enumerate(temperature_0_float) if
+                                            new_start_plot <= x <= end_plot]
+                # print(plot_temperature_0_float)
+                plt.plot(plot_date, plot_temperature_0_float, label="Temperature(°C)",
+                         color="red")  # values have to be of type float for temperature
+                new_start_plot = i + 1
+
+                # print(f"{i} {len(date)}")
+    # plt.plot(date, temperature_0_float, label="Temperature(°C)",
+    #          color="red")  # values have to be of type float for temperature
     plt.xlabel('Time', color="black", fontsize="30")
     plt.ylabel('Temperature', color="red", fontsize="30")
     plt.grid(color='grey', linestyle='--', visible=True)  # Color can be changed to white to hide grid
     min_value = min(temperature_0_float)
     max_value = max(temperature_0_float)
     plt.yscale('linear')
-    plt.yticks(np.arange(round(min_value-15), round(max_value+15), 5.0))
-    plt.ylim(min_value-20, max_value+20)
+    plt.yticks(np.arange(round(min_value - 15, -1), round(max_value + 15, 1), 5.0))
+    plt.ylim(min_value - 10, max_value + 10)
     # plt.ylim(bottom=-50,top=150)
     # plt.axis(ymin=-40, ymax=200)
     # plt.minorticks_off()
@@ -50,7 +71,7 @@ def graph(date, temperature_0, **kwargs):
     # ax.grid(True)
     # ax.xaxis.set_major_formatter(mdates.DateFormatter("%m"))
     # ax.xaxis.set_major_locator(locator=months)
-    # ax.xaxis.set_minor_locator(locator=weeks)
+    # ax.xaxis.set_minor_locatorlocator=weeks)
     # ax.xaxis.set_major_formatter(
     #     mdates.ConciseDateFormatter(ax.xaxis.get_major_locator()))
     # try:
@@ -80,6 +101,6 @@ def graph(date, temperature_0, **kwargs):
     figs = plt.savefig('graph.png')
     data = base64.b64encode(buf.getbuffer()).decode("ascii")
     # return f"<img src='data:image/png;base64,{data}'/>"
-    graph_result = plt.show() # to show graph
-    # html_str = mpld3.fig_to_html(fig)  # library which converts figure as html
-    # return html_str
+    # graph_result = plt.show() # to show graph
+    html_str = mpld3.fig_to_html(fig)  # library which converts figure as html
+    return html_str

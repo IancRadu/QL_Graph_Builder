@@ -41,7 +41,7 @@ def add_data_to_db():
             all_values = db.session.query(Files_added).all()
             values = [i.file_name for i in all_values]
             if child.name in values:
-                print(f"{child.name} is already loaded in database")
+                # print(f"{child.name} is already loaded in database")
                 continue
             else:
                 print(f"Started reading: {child.name}")
@@ -84,18 +84,19 @@ def append_data(values,chambers):
 
 @app.route("/",methods = ['GET', 'POST'])
 def show():
-    add_data_to_db()
-    # print(get_values(C1,start_date=datetime.datetime(2022, 5, 29, 0, 0, 53, 583000),end_date=datetime.datetime(2022, 5, 29, 1, 18, 53, 584000)))
-    # date1 = [1, 2, 3, 4, 5, 6]
-    # temperature_0 = [23, 42, 43, 44, 41, 23]
-    # humidity_1 = [82, 83, 84, 81, 85, 154]
+    # add_data_to_db()
+    values_between = get_values(C2,start_date=datetime.datetime(2022, 7, 29, 0, 0, 53, 583000),end_date=datetime.datetime(2022, 8, 29, 1, 18, 53, 584000))
+    date = [i for i in values_between]
+    temperature_0 = [values_between[i][0] for i in values_between]
+    # humidity_1 = [values_between[i][1] for i in values_between]
     Temperature_y_min = -20
     Temperature_y_max = 130
+    xygraph = graph(date, temperature_0)
+
     if request.method =="POST":
         # To get the names and values of forms
         # for i in request.form:
         #     print(f"{i} is {request.form[i]}")
-        # start = datetime.datetime.strptime(request.form["Start_date"].replace("T", " ") + ":00.000000","%Y-%m-%d %H:%M:%S %Z")
         # print(start)
         start = datetime.datetime.fromisoformat(request.form["Start_date"])
         end = datetime.datetime.fromisoformat(request.form["End_date"])
@@ -119,7 +120,7 @@ def show():
             pass
         return render_template('index.html', graph=xygraph)
     else:
-        return render_template('index.html')
+        return render_template('index.html', graph=xygraph)
 
 if __name__ == "__main__":
     app.run(debug=True)
